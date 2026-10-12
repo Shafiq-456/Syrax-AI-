@@ -1,0 +1,29 @@
+# --- Backend (Python) ---
+venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+**/*.pyc
+*.db
+**/*.db
+.env
+**/.env
+
+# --- Frontend (Node) ---
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+**/.vite/
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+**/.DS_Store
+
+# --- Scratch / Temp ---
+.tempmediaStorage/
+*.log
