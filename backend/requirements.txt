@@ -1,0 +1,17 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+pydantic-settings==2.5.2
+sqlalchemy==2.0.35
+python-dotenv==1.0.1
+httpx==0.27.2
+sse-starlette==2.1.3
+
+# Part 9 (Markdown export)
+markdown==3.7
+
+# Optional: uncomment for real AI features (requires API keys)
+# openai>=1.40.0        # Grok (xAI) via OpenAI-compatible API
+# chromadb==0.5.5       # Vector store for RAG
+# sentence-transformers==3.1.1  # Local embeddings
+# numpy==1.26.4
