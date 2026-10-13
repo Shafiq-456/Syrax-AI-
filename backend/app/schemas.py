@@ -81,3 +81,26 @@ class SubmitIdeaRequest(BaseModel):
 class ReviseIdeaRequest(BaseModel):
     idea_id: int
     revised_text: str
+
+
+# ---------- Auth & Workspace schemas ----------
+class UserRegisterRequest(BaseModel):
+    email: str
+    password: str
+    full_name: str | None = None
+    workspace_name: str | None = None
+
+
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user_id: int
+    email: str
+    full_name: str | None = None
+    workspace_id: int
+    workspace_name: str
+    role: str = "owner"

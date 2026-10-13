@@ -1,0 +1,34 @@
+# Syrax AI — Production Multi-Container Compose Configuration
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: syrax-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Syrax
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - DATABASE_URL=sqlite:///./data/syrax.db
+      - DEMO_MODE=true
+    volumes:
+      - syrax-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: syrax-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  syrax-data:

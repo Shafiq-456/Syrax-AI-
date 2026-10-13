@@ -16,8 +16,31 @@ from app import models  # noqa: F401 — import so models register with Base
 from app.api.routes import router as api_router
 
 # Creates tables from app/models if they don't exist yet.
-# Fine for SQLite + early development; swap for Alembic migrations later.
 Base.metadata.create_all(bind=engine)
+
+def _ensure_sqlite_columns():
+    """Ensure newly added columns exist in SQLite without dropping tables."""
+    from sqlalchemy import text
+    try:
+        with engine.connect() as conn:
+            cols_ideas = [r[1] for r in conn.execute(text("PRAGMA table_info(ideas)"))]
+            if "workspace_id" not in cols_ideas:
+                conn.execute(text("ALTER TABLE ideas ADD COLUMN workspace_id INTEGER"))
+            if "user_id" not in cols_ideas:
+                conn.execute(text("ALTER TABLE ideas ADD COLUMN user_id INTEGER"))
+
+            cols_rv = [r[1] for r in conn.execute(text("PRAGMA table_info(report_versions)"))]
+            if "status" not in cols_rv:
+                conn.execute(text("ALTER TABLE report_versions ADD COLUMN status VARCHAR(50) DEFAULT 'completed'"))
+
+            cols_src = [r[1] for r in conn.execute(text("PRAGMA table_info(sources)"))]
+            if "provenance" not in cols_src:
+                conn.execute(text("ALTER TABLE sources ADD COLUMN provenance VARCHAR(50) DEFAULT 'live'"))
+            conn.commit()
+    except Exception as e:
+        print(f"Schema check notice: {e}")
+
+_ensure_sqlite_columns()
 
 app = FastAPI(title=settings.app_name)
 

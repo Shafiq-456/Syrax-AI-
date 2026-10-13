@@ -134,10 +134,15 @@ export default function ResearchExplorerPage() {
                 }}
               >
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                    <span className={`badge ${isPaper ? "badge-violet" : "badge-cyan"}`}>
-                      {isPaper ? "Academic Paper" : "GitHub Repository"}
-                    </span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span className={`badge ${isPaper ? "badge-violet" : "badge-cyan"}`}>
+                        {isPaper ? "Academic Paper" : "GitHub Repository"}
+                      </span>
+                      <span className={`badge ${src.provenance === "live" ? "badge-emerald" : "badge-amber"}`} style={{ fontSize: "0.68rem" }}>
+                        ● {src.provenance === "live" ? "Live Source" : "Simulated Fixture"}
+                      </span>
+                    </div>
                     <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
                       Report #{src.report_version_id}
                     </span>

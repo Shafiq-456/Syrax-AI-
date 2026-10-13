@@ -20,18 +20,37 @@ Respond with ONLY a JSON object: {"score": <float 0-1>, "reasoning": "<one sente
 """
 
 
+STOPWORDS = {
+    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are",
+    "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but",
+    "by", "can", "did", "do", "does", "doing", "don", "down", "during", "each", "few", "for",
+    "from", "further", "had", "has", "have", "having", "he", "her", "here", "hers", "herself",
+    "him", "himself", "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself", "just",
+    "me", "more", "most", "my", "myself", "no", "nor", "not", "now", "of", "off", "on", "once",
+    "only", "or", "other", "our", "ours", "ourselves", "out", "over", "own", "same", "she",
+    "should", "so", "some", "such", "than", "that", "the", "their", "theirs", "them",
+    "themselves", "then", "there", "these", "they", "this", "those", "through", "to", "too",
+    "under", "until", "up", "very", "was", "we", "were", "what", "when", "where", "which",
+    "while", "who", "whom", "why", "will", "with", "you", "your", "yours", "yourself", "yourselves"
+}
+
 def _simple_cosine(a: str, b: str) -> float:
     """
     Lightweight bag-of-words cosine similarity — no ML library needed.
-    Used as the embedding proxy when sentence-transformers is not installed.
+    Filters common stopwords to surface meaningful lexical overlap.
     """
+    import re
+
     def tok(s: str) -> dict:
         freq: dict = {}
-        for w in s.lower().split():
-            freq[w] = freq.get(w, 0) + 1
+        for w in re.findall(r'[a-zA-Z0-9]+', s.lower()):
+            if w not in STOPWORDS and len(w) > 1:
+                freq[w] = freq.get(w, 0) + 1
         return freq
 
     va, vb = tok(a), tok(b)
+    if not va or not vb:
+        return 0.0
     keys = set(va) | set(vb)
     dot = sum(va.get(k, 0) * vb.get(k, 0) for k in keys)
     norm_a = math.sqrt(sum(v ** 2 for v in va.values())) or 1e-9
