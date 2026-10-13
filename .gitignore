@@ -7,6 +7,10 @@ __pycache__/
 **/*.pyc
 *.db
 **/*.db
+*.db-wal
+**/*.db-wal
+*.db-shm
+**/*.db-shm
 .env
 **/.env
 

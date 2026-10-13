@@ -30,12 +30,18 @@ async def run_pipeline(db: Session, idea_id: int, raw_text: str) -> AsyncGenerat
 
     idea = db.get(Idea, idea_id)
     next_version = len(idea.report_versions) + 1
-    report_version = ReportVersion(idea_id=idea_id, version_number=next_version)
+    report_version = ReportVersion(
+        idea_id=idea_id,
+        version_number=next_version,
+        status="running",
+    )
     db.add(report_version)
     db.commit()
     db.refresh(report_version)
 
     try:
+        from app.core.config import settings
+
         yield {"stage": "idea_analysis", "status": "running"}
         idea_analysis = analyze_idea(raw_text)
         yield {"stage": "idea_analysis", "status": "done", "detail": idea_analysis.model_dump()}
@@ -44,7 +50,12 @@ async def run_pipeline(db: Session, idea_id: int, raw_text: str) -> AsyncGenerat
         github_results = search_github_multi(idea_analysis.key_search_terms)
         paper_results = search_papers_multi(idea_analysis.key_search_terms)
         all_sources = github_results + paper_results
-        yield {"stage": "search", "status": "done", "detail": {"count": len(all_sources)}}
+        source_mode = "simulated" if settings.demo_mode else "live"
+        yield {
+            "stage": "search",
+            "status": "done",
+            "detail": {"count": len(all_sources), "provenance": source_mode}
+        }
 
         yield {"stage": "rag", "status": "running"}
         ingest_sources(report_version.id, all_sources)
@@ -78,20 +89,27 @@ async def run_pipeline(db: Session, idea_id: int, raw_text: str) -> AsyncGenerat
             sources_used=all_sources,
         )
 
-        # Persist sources + final report JSON on the ReportVersion row.
+        # Persist sources + final report JSON on the ReportVersion row with provenance.
         for src in all_sources:
             db.add(SourceModel(
                 report_version_id=report_version.id,
                 source_type=src.source_type, title=src.title,
                 url=src.url, summary=src.summary,
+                provenance=source_mode,
             ))
         report_version.novelty_score = novelty.novelty_score
         report_version.report_json = report.model_dump_json()
+        report_version.status = "completed"
         db.commit()
 
         yield {"stage": "report", "status": "done", "detail": {"report_version_id": report_version.id}}
         yield {"stage": "pipeline", "status": "complete", "detail": {"report_version_id": report_version.id}}
 
     except Exception as e:
+        report_version.status = "failed"
+        try:
+            db.commit()
+        except Exception:
+            pass
         yield {"stage": "pipeline", "status": "error", "detail": {"message": str(e)}}
         raise

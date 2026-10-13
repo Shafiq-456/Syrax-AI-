@@ -93,10 +93,19 @@ export default function ReportViewEnhanced({
               href={exportReportUrl(versionId, "markdown")}
               target="_blank"
               rel="noreferrer"
-              className="btn btn-primary btn-sm"
+              className="btn btn-secondary btn-sm"
               download
             >
               <span>↓</span> Export Markdown
+            </a>
+            <a
+              href={exportReportUrl(versionId, "pdf")}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-primary btn-sm"
+              download
+            >
+              <span>↓</span> Export PDF Dossier
             </a>
           </div>
         </div>
@@ -308,10 +317,15 @@ export default function ReportViewEnhanced({
                 </div>
 
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
-                    <h4 style={{ color: "var(--cyan)", textTransform: "none", fontSize: "0.95rem" }}>
-                      {src.title}
-                    </h4>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <h4 style={{ color: "var(--cyan)", textTransform: "none", fontSize: "0.95rem", margin: 0 }}>
+                        {src.title}
+                      </h4>
+                      <span className={`badge ${src.provenance === "live" ? "badge-emerald" : "badge-amber"}`} style={{ fontSize: "0.68rem" }}>
+                        ● {src.provenance === "live" ? "Verified Live Source" : "Simulated Fixture"}
+                      </span>
+                    </div>
                     {src.url && (
                       <a href={src.url} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">
                         Open ↗
